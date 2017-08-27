@@ -241,15 +241,15 @@ SetWindowStyle(SDL_Window * window, NSUInteger style)
     NSWindow *nswindow = data->nswindow;
 
     /* The view responder chain gets messed with during setStyleMask */
-    if ([[nswindow contentView] nextResponder] == data->listener) {
-        [[nswindow contentView] setNextResponder:nil];
+    if ([data->nsview nextResponder] == data->listener) {
+        [data->nsview setNextResponder:nil];
     }
 
     [nswindow setStyleMask:style];
 
     /* The view responder chain gets messed with during setStyleMask */
-    if ([[nswindow contentView] nextResponder] != data->listener) {
-        [[nswindow contentView] setNextResponder:data->listener];
+    if ([data->nsview nextResponder] != data->listener) {
+        [data->nsview setNextResponder:data->listener];
     }
 
     return SDL_TRUE;
@@ -262,7 +262,7 @@ SetWindowStyle(SDL_Window * window, NSUInteger style)
 {
     NSNotificationCenter *center;
     NSWindow *window = data->nswindow;
-    NSView *view = [window contentView];
+    NSView *view = data->nsview;
 
     _data = data;
     observingVisible = YES;
@@ -403,7 +403,7 @@ SetWindowStyle(SDL_Window * window, NSUInteger style)
 {
     NSNotificationCenter *center;
     NSWindow *window = _data->nswindow;
-    NSView *view = [window contentView];
+    NSView *view = _data->nsview;
 
     center = [NSNotificationCenter defaultCenter];
 
@@ -1289,7 +1289,8 @@ int
 Cocoa_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 { @autoreleasepool
 {
-    NSWindow *nswindow = (NSWindow *) data;
+	NSView* nsview = (NSView*) data;
+    NSWindow *nswindow = [nsview window];
     NSString *title;
 
     /* Query the title from the existing window */
@@ -1298,7 +1299,10 @@ Cocoa_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
         window->title = SDL_strdup([title UTF8String]);
     }
 
-    return SetupWindowData(_this, window, nswindow, SDL_FALSE);
+    int ret = SetupWindowData(_this, window, nswindow, SDL_FALSE);
+	SDL_WindowData* data = (SDL_WindowData*)window->driverdata;
+	data->nsview = nsview;
+	return ret;
 }}
 
 void
@@ -1514,8 +1518,8 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     NSRect rect;
 
     /* The view responder chain gets messed with during setStyleMask */
-    if ([[nswindow contentView] nextResponder] == data->listener) {
-        [[nswindow contentView] setNextResponder:nil];
+    if ([data->nsview nextResponder] == data->listener) {
+        [data->nsview setNextResponder:nil];
     }
 
     if (fullscreen) {
@@ -1551,8 +1555,8 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     }
 
     /* The view responder chain gets messed with during setStyleMask */
-    if ([[nswindow contentView] nextResponder] != data->listener) {
-        [[nswindow contentView] setNextResponder:data->listener];
+    if ([data->nsview nextResponder] != data->listener) {
+        [data->nsview setNextResponder:data->listener];
     }
 
     s_moveHack = 0;

@@ -114,6 +114,7 @@ struct SDL_WindowData
     SDL_bool inWindowMove;
     Cocoa_WindowListener *listener;
     struct SDL_VideoData *videodata;
+	NSView* nsview;
 };
 
 extern int Cocoa_CreateWindow(_THIS, SDL_Window * window);

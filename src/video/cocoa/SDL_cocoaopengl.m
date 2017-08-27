@@ -95,8 +95,8 @@
             [contexts addObject:self];
         }
 
-        if ([self view] != [windowdata->nswindow contentView]) {
-            [self setView:[windowdata->nswindow contentView]];
+        if ([self view] != windowdata->nsview) {
+            [self setView:windowdata->nsview];
             if (self == [NSOpenGLContext currentContext]) {
                 [self update];
             } else {
@@ -324,7 +324,7 @@ void
 Cocoa_GL_GetDrawableSize(_THIS, SDL_Window * window, int * w, int * h)
 {
     SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
-    NSView *contentView = [windata->nswindow contentView];
+    NSView *contentView = windata->nsview;
     NSRect viewport = [contentView bounds];
 
     /* This gives us the correct viewport for a Retina-enabled view, only
